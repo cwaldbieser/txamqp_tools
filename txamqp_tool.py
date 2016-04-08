@@ -2,8 +2,8 @@
 
 from __future__ import print_function
 import argparse
+import os.path
 import sys
-#from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.endpoints import clientFromString, connectProtocol
 from twisted.internet.task import react
@@ -13,17 +13,25 @@ from txamqp.protocol import AMQClient
 from txamqp.queue import Closed as QueueClosedError 
 import txamqp.spec                                  
 
-def main(reactor):
-    vhost = '/'
-    spec_path = '/home/waldbiec/git-repos/txamqp_tool/spec/amqp0-9-1.stripped.xml'
+def main(reactor, args):
+    vhost = args.vhost
+    user = args.user
+    passwd_file = args.passwd_file
+    if passwd_file is None:
+        passwd = 'guest'
+    else:
+        passwd = passwd_file.read()
+        passwd_file.close()
+    spec_path = os.path.join(
+        os.path.dirname(__file__),
+        'spec/amqp0-9-1.stripped.xml')
     spec = txamqp.spec.load(spec_path)
     params = {
-        'creds': ('guest', 'guest'),
-        'queue_name': 'test_q',
-        'consumer_tag': 'mytag',
+        'creds': (user, passwd),
+        'queue_name': args.queue_name,
+        'consumer_tag': args.consumer_tag,
     }
-    endpoint_s = "tls:host=thor.lafayette.edu:port=5671:trustRoots=/home/waldbiec/git-repos/txamqp_tool/tls/cacerts/:certificate=/home/waldbiec/dev-certs/rabbit.cert.pem:privateKey=/home/waldbiec/dev-certs/rabbit.key.pem"
-    #endpoint_s = "ssl:host=thor.lafayette.edu:port=5671:caCertsDir=/home/waldbiec/git-repos/txamqp_tool/tls/cacerts"
+    endpoint_s = args.endpoint 
     e = clientFromString(reactor, endpoint_s)
     delegate = TwistedDelegate()
     amqp_protocol = AMQClient(            
@@ -83,7 +91,39 @@ def process_amqp_message(queue, channel, consumer_tag):
         yield channel.basic_ack(delivery_tag=msg.delivery_tag)                                
                                                                                        
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="AMPQ message consumer.")
+    parser.add_argument(
+        "queue_name",
+        action="store",
+        help="A message queue name.")
+    parser.add_argument(
+        "-e",
+        "--endpoint",
+        action="store",
+        help="The client connection endpoint string.")
+    parser.add_argument(
+        "--vhost",
+        action="store",
+        default="/",
+        help="The port where the exchange can be located.")
+    parser.add_argument(
+        "-u",
+        "--user",
+        action="store",
+        default="guest",
+        help="The user used to log into the exchange.")
+    parser.add_argument(
+        "--passwd-file",
+        action="store",
+        type=argparse.FileType('r'),
+        help="A file containing the password used to log into the exchange.")
+    parser.add_argument(
+        "--consumer-tag",
+        action="store",
+        default="mytag",
+        help="The consumer tag for this consume (default 'mytag').")
+    args = parser.parse_args()
     try:
-        react(main)
+        react(main, [args])
     except filepath.UnlistableError as ex:
         print(ex.originalException)
