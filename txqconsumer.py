@@ -87,7 +87,10 @@ def process_amqp_message(queue, channel, consumer_tag):
     except QueueClosedError:                                                                      
         raise
     else:
-        tag, unk0, unk1, exchange_name, route_key = msg.fields
+        consumer_tag, delivery_tag, redelivered, exchange_name, route_key = msg.fields
+        print("Consumer tag: {0}".format(consumer_tag))
+        print("Delivery tag: {0}".format(msg.delivery_tag))
+        print("Redelivered: {0}".format(redelivered))
         print("Exchange: {0}".format(exchange_name))
         print("Routing key: {0}".format(route_key))
         print(msg.content.body)
