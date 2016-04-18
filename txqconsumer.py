@@ -8,7 +8,7 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.endpoints import clientFromString, connectProtocol
 from twisted.internet.task import react
 from twisted.python import filepath
-from txamqp.client import Closed, TwistedDelegate
+from txamqp.client import TwistedDelegate
 from txamqp.protocol import AMQClient               
 from txamqp.queue import Closed as QueueClosedError 
 import txamqp.spec                                  
