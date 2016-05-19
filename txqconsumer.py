@@ -20,7 +20,7 @@ def main(reactor, args):
     if passwd_file is None:
         passwd = 'guest'
     else:
-        passwd = passwd_file.read()
+        passwd = passwd_file.read().rstrip("\n\r")
         passwd_file.close()
     spec_path = os.path.join(
         os.path.dirname(__file__),
