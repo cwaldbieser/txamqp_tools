@@ -149,11 +149,6 @@ if __name__ == "__main__":
         type=argparse.FileType('r'),
         help="A file containing the password used to log into the exchange.")
     parser.add_argument(
-        "--consumer-tag",
-        action="store",
-        default="mytag",
-        help="The consumer tag for this consume (default 'mytag').")
-    parser.add_argument(
         "-e",
         "--endpoint",
         action="store",

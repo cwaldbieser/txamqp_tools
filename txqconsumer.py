@@ -114,7 +114,7 @@ if __name__ == "__main__":
         "--consumer-tag",
         action="store",
         default="mytag",
-        help="The consumer tag for this consume (default 'mytag').")
+        help="The consumer tag for this consumer (default 'mytag').")
     args = parser.parse_args()
     try:
         react(main, [args])
